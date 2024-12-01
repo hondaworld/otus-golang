@@ -1,4 +1,4 @@
-module github.com/hondaworld/hw01_hello_otus
+module github.com/hondaworld/otus-golang/hw01_hello_otus
 
 go 1.22
 
