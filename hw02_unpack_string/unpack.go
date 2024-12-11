@@ -47,6 +47,10 @@ func Unpack(str string) (string, error) {
 		}
 	}
 
+	if isSlash {
+		return "", ErrInvalidString
+	}
+
 	result.WriteString(lastValue)
 
 	return result.String(), nil
