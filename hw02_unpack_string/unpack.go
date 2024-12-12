@@ -19,12 +19,12 @@ func Unpack(str string) (string, error) {
 
 		if err == nil {
 			switch {
-			case lastValue == "":
-				return "", ErrInvalidString
 			case isSlash:
 				result.WriteString(lastValue)
 				lastValue = value
 				isSlash = false
+			case lastValue == "":
+				return "", ErrInvalidString
 			default:
 				result.WriteString(strings.Repeat(lastValue, num))
 				lastValue = ""
