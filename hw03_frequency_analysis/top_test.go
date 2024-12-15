@@ -48,6 +48,33 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("Some punctuations", func(t *testing.T) {
+		require.Equal(t, []string{
+			"тук-тук",
+			"сказал",
+		}, Top10(`'"сказал"': 'Тук-Тук!!! Тук-Тук!??'`))
+	})
+
+	t.Run("Every cases", func(t *testing.T) {
+		require.Equal(t, []string{
+			"винни-пух",
+			"и",
+			"а",
+			"мальчик",
+			"пяточок",
+			"также",
+		}, Top10(`Мальчик и Винни-Пух, а также ПЯТОЧОК и винни-ПУХ`))
+	})
+
+	t.Run("Sorting by alphabet", func(t *testing.T) {
+		require.Equal(t, []string{
+			"а",
+			"б",
+			"и",
+			"не",
+		}, Top10(`Б и А не А и Б`))
+	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
