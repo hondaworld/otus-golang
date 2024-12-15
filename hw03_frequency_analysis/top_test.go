@@ -75,6 +75,12 @@ func TestTop10(t *testing.T) {
 		}, Top10(`Б и А не А и Б`))
 	})
 
+	t.Run("Empty words", func(t *testing.T) {
+		require.Equal(t, []string{
+			"пустые",
+		}, Top10(`Пустые: - !?`))
+	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
