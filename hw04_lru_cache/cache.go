@@ -35,15 +35,15 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 		return true
 	}
 
-	newCacheItem := &CacheItem{key: key, value: value}
-	newItem := l.queue.PushFront(newCacheItem)
-	l.items[key] = newItem
-
-	if l.queue.Len() > l.capacity {
+	if l.queue.Len() == l.capacity {
 		lastItem := l.queue.Back()
 		l.queue.Remove(lastItem)
 		delete(l.items, lastItem.Value.(*CacheItem).key)
 	}
+
+	newCacheItem := &CacheItem{key: key, value: value}
+	newItem := l.queue.PushFront(newCacheItem)
+	l.items[key] = newItem
 
 	return false
 }

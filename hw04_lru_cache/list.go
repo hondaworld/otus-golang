@@ -83,7 +83,6 @@ func (l *list) Remove(i *ListItem) {
 		}
 	}
 
-	i = nil
 	l.Length--
 }
 
