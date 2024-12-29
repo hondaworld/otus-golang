@@ -6,6 +6,11 @@ import (
 
 type Key string
 
+type CacheItem struct {
+	key   Key
+	value interface{}
+}
+
 type Cache interface {
 	Set(key Key, value interface{}) bool
 	Get(key Key) (interface{}, bool)
@@ -24,25 +29,20 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	defer l.mu.Unlock()
 
 	if item, ok := l.items[key]; ok {
-		l.items[key].Value = value
+		item.Value.(*CacheItem).value = value
 		l.queue.MoveToFront(item)
 
 		return true
 	}
 
-	newItem := l.queue.PushFront(value)
+	newCacheItem := &CacheItem{key: key, value: value}
+	newItem := l.queue.PushFront(newCacheItem)
 	l.items[key] = newItem
 
 	if l.queue.Len() > l.capacity {
 		lastItem := l.queue.Back()
 		l.queue.Remove(lastItem)
-
-		for key, item := range l.items {
-			if item == lastItem {
-				delete(l.items, key)
-				break
-			}
-		}
+		delete(l.items, lastItem.Value.(*CacheItem).key)
 	}
 
 	return false
@@ -60,7 +60,7 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 
 	l.queue.MoveToFront(item)
 
-	return item.Value, true
+	return item.Value.(*CacheItem).value, true
 }
 
 func (l *lruCache) Clear() {

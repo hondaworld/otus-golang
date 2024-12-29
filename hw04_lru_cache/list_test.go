@@ -28,11 +28,12 @@ func TestList(t *testing.T) {
 	t.Run("one element added to last", func(t *testing.T) {
 		l := NewList()
 
-		l.PushBack(20)
+		l.PushBack(10)
+		l.Remove(l.Front())
 
-		require.Equal(t, 1, l.Len())
-		require.Equal(t, 20, l.Front().Value)
-		require.Equal(t, 20, l.Back().Value)
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
 	})
 
 	t.Run("add two elements and remove first element", func(t *testing.T) {
@@ -46,6 +47,17 @@ func TestList(t *testing.T) {
 		require.Equal(t, 20, l.Front().Value)
 		require.Equal(t, 20, l.Back().Value)
 		require.Nil(t, l.Front().Prev)
+	})
+
+	t.Run("add one element and remove first element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.Remove(l.Front())
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
 	})
 
 	t.Run("add two elements and remove last element", func(t *testing.T) {
