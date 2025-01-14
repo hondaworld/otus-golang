@@ -11,29 +11,19 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	jobs := make(chan Task, len(tasks))
+	jobs := make(chan Task)
 	wg := sync.WaitGroup{}
 	mu := sync.Mutex{}
 	errorsCount := 0
+	isFinish := false
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
-			isFinish := false
 
 			for job := range jobs {
-				mu.Lock()
-				if m > 0 && errorsCount >= m {
-					isFinish = true
-				}
-				mu.Unlock()
-
-				if isFinish {
-					break
-				}
-
 				err := job()
 
 				if err != nil {
@@ -46,6 +36,16 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	for _, task := range tasks {
+		mu.Lock()
+		if m > 0 && errorsCount >= m {
+			isFinish = true
+		}
+		mu.Unlock()
+
+		if isFinish {
+			break
+		}
+
 		jobs <- task
 	}
 
@@ -53,7 +53,7 @@ func Run(tasks []Task, n, m int) error {
 
 	wg.Wait()
 
-	if m > 0 && errorsCount >= m {
+	if isFinish {
 		return ErrErrorsLimitExceeded
 	}
 

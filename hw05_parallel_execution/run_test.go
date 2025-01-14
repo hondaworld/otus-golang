@@ -76,14 +76,14 @@ func TestRun(t *testing.T) {
 
 		for inc := 15; inc < 40; inc += 10 {
 			taskSleep := time.Millisecond * time.Duration(inc)
-			err := fmt.Errorf("error")
+			err := fmt.Errorf("error %d", inc)
 			tasks = append(tasks, func() error {
 				time.Sleep(taskSleep)
 				return err
 			})
 		}
 
-		for inc := 10; inc < 50; inc += 10 {
+		for inc := 10; inc < 60; inc += 10 {
 			for i := 0; i < tasksCount; i++ {
 				taskSleep := time.Millisecond * time.Duration(inc)
 				tasks = append(tasks, func() error {
@@ -98,14 +98,14 @@ func TestRun(t *testing.T) {
 		_ = Run(tasks, workersCount, 1)
 
 		require.Eventually(t, func() bool {
-			return runTasksCount == 4
+			return runTasksCount == 5
 		}, time.Millisecond*10, time.Millisecond, "not all tasks were completed")
 
 		runTasksCount = 0
 		_ = Run(tasks, workersCount, 2)
 
 		require.Eventually(t, func() bool {
-			return runTasksCount == 6
+			return runTasksCount == 7
 		}, time.Millisecond*10, time.Millisecond, "not all tasks were completed")
 
 		workersCount = 6
@@ -113,7 +113,7 @@ func TestRun(t *testing.T) {
 		_ = Run(tasks, workersCount, 3)
 
 		require.Eventually(t, func() bool {
-			return runTasksCount == 11
+			return runTasksCount == 12
 		}, time.Millisecond*10, time.Millisecond, "not all tasks were completed")
 	})
 
