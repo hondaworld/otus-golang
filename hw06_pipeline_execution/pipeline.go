@@ -1,7 +1,5 @@
 package hw06pipelineexecution
 
-import "fmt"
-
 type (
 	In  = <-chan interface{}
 	Out = In
@@ -37,8 +35,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		for stage := range pipeline {
 			select {
 			case <-done:
-				fmt.Println(111)
-				return
+				break
 			default:
 				out <- stage
 			}
