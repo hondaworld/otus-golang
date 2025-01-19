@@ -18,15 +18,12 @@ var isFullTesting = true
 
 func TestPipeline(t *testing.T) {
 	// Stage generator
-	g := func(s string, f func(v interface{}) interface{}) Stage {
+	g := func(_ string, f func(v interface{}) interface{}) Stage {
 		return func(in In) Out {
-			println("Stage: " + s)
 			out := make(Bi)
 			go func() {
 				defer close(out)
 				for v := range in {
-					//println(v.(int))
-					//fmt.Printf("log: %s", f(v))
 					time.Sleep(sleepPerStage)
 					out <- f(v)
 				}
@@ -36,10 +33,10 @@ func TestPipeline(t *testing.T) {
 	}
 
 	stages := []Stage{
-		g("Dummy", func(v interface{}) interface{} { println(v.(int)); return v }),
-		g("Multiplier (* 2)", func(v interface{}) interface{} { println(v.(int)); return v.(int) * 2 }),
-		g("Adder (+ 100)", func(v interface{}) interface{} { println(v.(int)); return v.(int) + 100 }),
-		g("Stringifier", func(v interface{}) interface{} { println(v.(int)); return strconv.Itoa(v.(int)) }),
+		g("Dummy", func(v interface{}) interface{} { return v }),
+		g("Multiplier (* 2)", func(v interface{}) interface{} { return v.(int) * 2 }),
+		g("Adder (+ 100)", func(v interface{}) interface{} { return v.(int) + 100 }),
+		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
 	}
 
 	t.Run("simple case", func(t *testing.T) {
@@ -56,8 +53,6 @@ func TestPipeline(t *testing.T) {
 		result := make([]string, 0, 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, nil, stages...) {
-			println("Total:")
-			//println(s.(int))
 			result = append(result, s.(string))
 		}
 		elapsed := time.Since(start)
@@ -75,9 +70,9 @@ func TestPipeline(t *testing.T) {
 		data := []int{1, 2, 3, 4, 5}
 
 		// Abort after 200ms
-		abortDur := 0
+		abortDur := sleepPerStage * 2
 		go func() {
-			//<-time.After(abortDur)
+			<-time.After(abortDur)
 			close(done)
 		}()
 
