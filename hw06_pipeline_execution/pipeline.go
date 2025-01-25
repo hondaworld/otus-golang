@@ -22,11 +22,12 @@ func pipeline(stages ...Stage) StageOut {
 
 func take(in In, done In, stage Stage) Out {
 	out := make(Bi)
+	temp := make(Bi)
 
 	go func() {
 		defer close(out)
 
-		for v := range stage(in) {
+		for v := range temp {
 			select {
 			case <-done:
 				return
@@ -35,23 +36,41 @@ func take(in In, done In, stage Stage) Out {
 		}
 	}()
 
+	go func() {
+		defer close(temp)
+
+		for v := range stage(in) {
+			temp <- v
+		}
+	}()
+
 	return out
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	out := make(Bi)
+	temp := make(Bi)
 
 	finalStage := pipeline(stages...)
 
 	go func() {
 		defer close(out)
 
-		for v := range finalStage(in, done) {
+		for v := range temp {
 			select {
 			case <-done:
+				close(temp)
 				return
 			case out <- v:
 			}
+		}
+	}()
+
+	go func() {
+		defer close(temp)
+
+		for v := range finalStage(in, done) {
+			temp <- v
 		}
 	}()
 
