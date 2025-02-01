@@ -94,7 +94,7 @@ func TestCopy(t *testing.T) {
 
 		errCopy := Copy(file1Wrong, file2.Name(), 10000, 1000)
 
-		require.Truef(t, errors.Is(errCopy, ErrUnsupportedFile), "actual err - %v", errCopy)
+		require.Errorf(t, errCopy, "failed to source file testdata1/input.txt: open testdata1/input.txt: no such file or directory", "actual err - %v", errCopy)
 	})
 	t.Run("identical files", func(t *testing.T) {
 		errCopy := Copy(file1, file1, 0, 0)

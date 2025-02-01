@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -21,13 +22,13 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	sourceFile, err := os.OpenFile(fromPath, os.O_RDONLY, 0)
 	if err != nil {
-		return ErrUnsupportedFile
+		return fmt.Errorf("failed to source file %s: %w", fromPath, err)
 	}
 	defer sourceFile.Close()
 
 	sourceFileInfo, err := sourceFile.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed get info in file %s: %w", fromPath, err)
 	}
 
 	if sourceFileInfo.Size() == 0 {
@@ -45,7 +46,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	destinationFile, err := os.Create(toPath)
 	if err != nil {
-		return ErrUnsupportedFile
+		return fmt.Errorf("failed to destination file %s: %w", toPath, err)
 	}
 	defer destinationFile.Close()
 
@@ -63,7 +64,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	_, err = io.CopyN(destinationFile, progressReader, limit)
 	if err != nil && !errors.Is(err, io.EOF) {
-		return err
+		os.Remove(toPath)
+		return fmt.Errorf("failed in copy files: %w", err)
 	}
 
 	return nil
