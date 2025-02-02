@@ -14,6 +14,7 @@ const bysToCopyDefault = 1024
 
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
+	ErrUnsupportedDir        = errors.New("the directory is not supported")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 	ErrIdenticalFiles        = errors.New("source and destination are same")
 )
@@ -44,13 +45,17 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return fmt.Errorf("failed get info in file %s: %w", fromPath, err)
 	}
 
+	if sourceFileInfo.Mode().IsDir() {
+		return ErrUnsupportedDir
+	}
+
 	destinationFile, err := os.Create(toPath)
 	if err != nil {
 		return fmt.Errorf("failed to destination file %s: %w", toPath, err)
 	}
 	defer destinationFile.Close()
 
-	if sourceFileInfo.Size() == 0 {
+	if !sourceFileInfo.Mode().IsRegular() {
 		if limit == 0 {
 			limit = bysToCopyDefault
 		}

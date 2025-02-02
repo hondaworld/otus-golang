@@ -102,6 +102,13 @@ func TestCopy(t *testing.T) {
 
 		require.Truef(t, errors.Is(errCopy, ErrIdenticalFiles), "actual err - %v", errCopy)
 	})
+	t.Run("unsupported dir", func(t *testing.T) {
+		file1 := "testdata"
+		file2 := "testdata/out.txt"
+		errCopy := Copy(file1, file2, 0, 0)
+
+		require.Truef(t, errors.Is(errCopy, ErrUnsupportedDir), "actual err - %v", errCopy)
+	})
 }
 
 func filesAreEqual(file1, file2 string) (bool, error) {
