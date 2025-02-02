@@ -97,23 +97,10 @@ func TestCopy(t *testing.T) {
 		require.Errorf(t, errCopy, "failed to source file testdata1/input.txt: open testdata1/input.txt: no such file or directory", "actual err - %v", errCopy)
 	})
 	t.Run("identical files", func(t *testing.T) {
-		errCopy := Copy(file1, file1, 0, 0)
+		file2 := "./testdata/input.txt"
+		errCopy := Copy(file1, file2, 0, 0)
 
 		require.Truef(t, errors.Is(errCopy, ErrIdenticalFiles), "actual err - %v", errCopy)
-	})
-	t.Run("special file", func(t *testing.T) {
-		fileSpecial := "/dev/urandom"
-		file2, err := os.CreateTemp("", "test-*")
-
-		if err != nil {
-			log.Fatalf("Failed to create temp file: %v", err)
-		}
-		defer os.Remove(file2.Name())
-		defer file2.Close()
-
-		errCopy := Copy(fileSpecial, file2.Name(), 10000, 1000)
-
-		require.Truef(t, errors.Is(errCopy, ErrUnsupportedFile), "actual err - %v", errCopy)
 	})
 }
 

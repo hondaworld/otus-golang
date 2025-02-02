@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/cheggaaa/pb/v3"
 )
+
+const bysToCopyDefault = 1024
 
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
@@ -16,7 +19,17 @@ var (
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-	if fromPath == toPath {
+	absFromPath, err := filepath.Abs(fromPath)
+	if err != nil {
+		return fmt.Errorf("failed to get abs path %s: %w", fromPath, err)
+	}
+
+	absToPath, err := filepath.Abs(toPath)
+	if err != nil {
+		return fmt.Errorf("failed to get abs path %s: %w", toPath, err)
+	}
+
+	if filepath.Clean(absFromPath) == filepath.Clean(absToPath) {
 		return ErrIdenticalFiles
 	}
 
@@ -31,30 +44,32 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return fmt.Errorf("failed get info in file %s: %w", fromPath, err)
 	}
 
-	if sourceFileInfo.Size() == 0 {
-		return ErrUnsupportedFile
-	}
-
-	if offset > sourceFileInfo.Size() {
-		return ErrOffsetExceedsFileSize
-	}
-
-	_, err = sourceFile.Seek(offset, io.SeekStart)
-	if err != nil {
-		return ErrOffsetExceedsFileSize
-	}
-
 	destinationFile, err := os.Create(toPath)
 	if err != nil {
 		return fmt.Errorf("failed to destination file %s: %w", toPath, err)
 	}
 	defer destinationFile.Close()
 
-	switch {
-	case limit == 0:
-		limit = sourceFileInfo.Size() - offset
-	case limit > sourceFileInfo.Size()-offset:
-		limit = sourceFileInfo.Size() - offset
+	if sourceFileInfo.Size() == 0 {
+		if limit == 0 {
+			limit = bysToCopyDefault
+		}
+	} else {
+		if offset > sourceFileInfo.Size() {
+			return ErrOffsetExceedsFileSize
+		}
+
+		_, err = sourceFile.Seek(offset, io.SeekStart)
+		if err != nil {
+			return ErrOffsetExceedsFileSize
+		}
+
+		switch {
+		case limit == 0:
+			limit = sourceFileInfo.Size() - offset
+		case limit > sourceFileInfo.Size()-offset:
+			limit = sourceFileInfo.Size() - offset
+		}
 	}
 
 	bar := pb.Full.Start64(limit)
