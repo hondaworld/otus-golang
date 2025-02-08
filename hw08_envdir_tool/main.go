@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -10,9 +10,11 @@ func main() {
 
 	environment, err := ReadDir(envDir)
 
-	if err == nil {
-		RunCmd(os.Args, environment)
-	} else {
-		log.Fatalf("failed to read files: %v", err)
+	if err != nil {
+		fmt.Println(fmt.Errorf("failed to read files: %v", err))
+		os.Exit(1)
 	}
+
+	code := RunCmd(os.Args, environment)
+	os.Exit(code)
 }
