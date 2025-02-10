@@ -20,6 +20,96 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 	})
 
+	t.Run("more than capacity", func(t *testing.T) {
+		c := NewCache(2)
+
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300)
+		require.False(t, wasInCache)
+
+		_, ok := c.Get("aaa")
+		require.False(t, ok)
+
+		val, ok := c.Get("bbb")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+
+		val, ok = c.Get("ccc")
+		require.True(t, ok)
+		require.Equal(t, 300, val)
+
+		wasInCache = c.Set("ddd", 400)
+		require.False(t, wasInCache)
+
+		_, ok = c.Get("bbb")
+		require.False(t, ok)
+
+		val, ok = c.Get("ddd")
+		require.True(t, ok)
+		require.Equal(t, 400, val)
+	})
+
+	t.Run("more than capacity with sorting", func(t *testing.T) {
+		c := NewCache(3)
+
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300)
+		require.False(t, wasInCache)
+
+		val, ok := c.Get("bbb")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+
+		val, ok = c.Get("aaa")
+		require.True(t, ok)
+		require.Equal(t, 100, val)
+
+		wasInCache = c.Set("ddd", 400)
+		require.False(t, wasInCache)
+
+		_, ok = c.Get("ccc")
+		require.False(t, ok)
+	})
+
+	t.Run("clear", func(t *testing.T) {
+		c := NewCache(2)
+
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200)
+		require.False(t, wasInCache)
+
+		val, ok := c.Get("bbb")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+
+		c.Clear()
+
+		_, ok = c.Get("aaa")
+		require.False(t, ok)
+
+		_, ok = c.Get("bbb")
+		require.False(t, ok)
+
+		wasInCache = c.Set("ccc", 300)
+		require.False(t, wasInCache)
+
+		val, ok = c.Get("ccc")
+		require.True(t, ok)
+		require.Equal(t, 300, val)
+	})
+
 	t.Run("simple", func(t *testing.T) {
 		c := NewCache(5)
 
@@ -55,8 +145,6 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
-
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)

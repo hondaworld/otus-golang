@@ -15,6 +15,105 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("one element added to front", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 10, l.Front().Value)
+		require.Equal(t, 10, l.Back().Value)
+	})
+
+	t.Run("one element added to last", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(10)
+		l.Remove(l.Front())
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+
+	t.Run("add two elements and remove first element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushBack(20)
+		l.Remove(l.Front())
+
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 20, l.Front().Value)
+		require.Equal(t, 20, l.Back().Value)
+		require.Nil(t, l.Front().Prev)
+	})
+
+	t.Run("add one element and remove first element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.Remove(l.Front())
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+
+	t.Run("add two elements and remove last element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushBack(20)
+		l.Remove(l.Back())
+
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 10, l.Front().Value)
+		require.Equal(t, 10, l.Back().Value)
+		require.Nil(t, l.Back().Next)
+	})
+
+	t.Run("move to first last element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushBack(20)
+		l.MoveToFront(l.Back())
+
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, 20, l.Front().Value)
+		require.Equal(t, 10, l.Back().Value)
+		require.Nil(t, l.Front().Prev)
+		require.Nil(t, l.Back().Next)
+	})
+
+	t.Run("move to first first element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushBack(20)
+		l.MoveToFront(l.Front())
+
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, 10, l.Front().Value)
+		require.Equal(t, 20, l.Back().Value)
+		require.Nil(t, l.Front().Prev)
+	})
+
+	t.Run("move to first middle element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(20)
+		l.PushFront(10)
+		l.PushBack(30)
+		l.MoveToFront(l.Front().Next)
+
+		require.Equal(t, 3, l.Len())
+		require.Equal(t, 20, l.Front().Value)
+		require.Equal(t, 30, l.Back().Value)
+		require.Nil(t, l.Front().Prev)
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 
