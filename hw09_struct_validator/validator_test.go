@@ -2,6 +2,7 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -42,10 +43,77 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in: User{
+				ID:   "abcde4",
+				Age:  18,
+				Role: UserRole("admin"),
+			},
+			expectedErr: ErrInvalidLen,
 		},
-		// ...
-		// Place your code here.
+		{
+			in: User{
+				ID:   "abcde-abcde-abcde-abcde-abcde-abcdef",
+				Age:  17,
+				Role: UserRole("admin"),
+			},
+			expectedErr: ErrInvalidMin,
+		},
+		{
+			in: User{
+				ID:   "abcde-abcde-abcde-abcde-abcde-abcdef",
+				Age:  55,
+				Role: UserRole("admin"),
+			},
+			expectedErr: ErrInvalidMax,
+		},
+		{
+			in: User{
+				ID:    "abcde-abcde-abcde-abcde-abcde-abcdef",
+				Age:   18,
+				Role:  UserRole("admin"),
+				Email: "john.doe@example.com",
+			},
+			expectedErr: ErrInvalidRegexp,
+		},
+		{
+			in: User{
+				ID:     "abcde-abcde-abcde-abcde-abcde-abcdef",
+				Age:    18,
+				Role:   UserRole("admin1"),
+				Phones: []string{"+7999111111", "+7999111111"},
+			},
+			expectedErr: ErrInvalidIn,
+		},
+		{
+			in: User{
+				ID:     "abcde-abcde-abcde-abcde-abcde-abcdef",
+				Age:    18,
+				Role:   UserRole("admin"),
+				Phones: []string{"+7999111111", "+79991"},
+			},
+			expectedErr: ErrInvalidLen,
+		},
+		{
+			in: App{
+				Version: "1.2",
+			},
+			expectedErr: ErrInvalidLen,
+		},
+		{
+			in: Token{
+				Header:    []byte{123, 2},
+				Payload:   []byte{14, 44},
+				Signature: []byte{55, 32},
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 201,
+				Body: "12312",
+			},
+			expectedErr: ErrInvalidIn,
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +121,19 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			var validationErrors ValidationErrors
+
+			err := Validate(tt.in)
+
+			if errors.As(err, &validationErrors) {
+				for _, ve := range validationErrors {
+					if !errors.Is(ve.Err, tt.expectedErr) {
+						t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+					}
+				}
+			} else {
+				t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+			}
 		})
 	}
 }
