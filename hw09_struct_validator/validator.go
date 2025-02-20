@@ -15,6 +15,7 @@ var (
 	ErrInvalidMax    = errors.New("invalid max")
 	ErrInvalidIn     = errors.New("invalid in")
 	ErrInvalidRegexp = errors.New("invalid regexp")
+	ErrInvalidType   = errors.New("invalid type")
 )
 
 type ValidationError struct {
@@ -70,7 +71,6 @@ func Validate(v interface{}) error {
 					err := validateField(part, value.Interface(), &fieldErr)
 
 					if err != nil {
-						println(1111)
 						return err
 					}
 				}
@@ -100,22 +100,32 @@ func validateField(tag string, value interface{}, fieldErr *ValidationError) err
 			if len(str) != val {
 				validError = fmt.Errorf("%s length should be %v: %w", str, tagValue, ErrInvalidLen)
 			}
+		} else {
+			return fmt.Errorf("type of value must be string: %w", ErrInvalidType)
 		}
 	case "min":
 		val, err := strconv.Atoi(tagValue)
 		if err != nil {
 			return err
 		}
-		if value.(int) < val {
-			validError = fmt.Errorf("%v less then %v: %w", value.(int), tagValue, ErrInvalidMin)
+		if valInt, ok := value.(int); ok {
+			if valInt < val {
+				validError = fmt.Errorf("%v less then %v: %w", valInt, tagValue, ErrInvalidMin)
+			}
+		} else {
+			return fmt.Errorf("type of value must be int: %w", ErrInvalidType)
 		}
 	case "max":
 		val, err := strconv.Atoi(tagValue)
 		if err != nil {
 			return err
 		}
-		if value.(int) > val {
-			validError = fmt.Errorf("%v more then %v: %w", value.(int), tagValue, ErrInvalidMax)
+		if valInt, ok := value.(int); ok {
+			if valInt > val {
+				validError = fmt.Errorf("%v more then %v: %w", valInt, tagValue, ErrInvalidMax)
+			}
+		} else {
+			return fmt.Errorf("type of value must be int: %w", ErrInvalidType)
 		}
 	case "in":
 		options := strings.Split(tagValue, ",")
@@ -137,6 +147,8 @@ func validateField(tag string, value interface{}, fieldErr *ValidationError) err
 			if str != "" && !regex.MatchString(str) {
 				validError = fmt.Errorf("value '%s' does not match pattern '%s': %w", str, tagValue, ErrInvalidRegexp)
 			}
+		} else {
+			return fmt.Errorf("type of value must be string: %w", ErrInvalidType)
 		}
 
 	}

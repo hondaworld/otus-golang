@@ -35,6 +35,22 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	WrongTypeLen struct {
+		Field int `validate:"len:4"`
+	}
+
+	WrongTypeRegexp struct {
+		Field int `validate:"regexp:^\\d+$"`
+	}
+
+	WrongTypeMin struct {
+		Field string `validate:"min:18"`
+	}
+
+	WrongTypeMax struct {
+		Field string `validate:"max:50"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -114,6 +130,30 @@ func TestValidate(t *testing.T) {
 			},
 			expectedErr: ErrInvalidIn,
 		},
+		{
+			in: WrongTypeLen{
+				Field: 123,
+			},
+			expectedErr: ErrInvalidType,
+		},
+		{
+			in: WrongTypeRegexp{
+				Field: 123,
+			},
+			expectedErr: ErrInvalidType,
+		},
+		{
+			in: WrongTypeMin{
+				Field: "123",
+			},
+			expectedErr: ErrInvalidType,
+		},
+		{
+			in: WrongTypeMax{
+				Field: "123",
+			},
+			expectedErr: ErrInvalidType,
+		},
 	}
 
 	for i, tt := range tests {
@@ -125,15 +165,27 @@ func TestValidate(t *testing.T) {
 
 			err := Validate(tt.in)
 
-			if errors.As(err, &validationErrors) {
+			fmt.Println(validationErrors)
+			switch {
+			case errors.As(err, &validationErrors):
 				for _, ve := range validationErrors {
 					if !errors.Is(ve.Err, tt.expectedErr) {
 						t.Errorf("expected error %v, got %v", tt.expectedErr, err)
 					}
 				}
-			} else {
+			case !errors.Is(err, tt.expectedErr):
 				t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+
 			}
+			//if errors.As(err, &validationErrors) {
+			//	for _, ve := range validationErrors {
+			//		if !errors.Is(ve.Err, tt.expectedErr) {
+			//			t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+			//		}
+			//	}
+			//} else {
+			//	t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+			//}
 		})
 	}
 }
