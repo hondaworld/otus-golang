@@ -1,0 +1,7 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/hondaworld/otus-golang/hw10_program_optimization
+cpu: Apple M1 Pro
+BenchmarkExample-10    	      14	  74925774 ns/op	136045528 B/op	 1700090 allocs/op
+PASS
+ok  	github.com/hondaworld/otus-golang/hw10_program_optimization	1.688s
