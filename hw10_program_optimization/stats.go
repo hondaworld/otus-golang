@@ -22,25 +22,20 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return countDomains(u, domain)
 }
 
-type emails [100_000]UserEmail
+type emails []UserEmail
 
 func getEmails(r io.Reader) (result emails, err error) {
-	i := 0
+	initialCapacity := 100_000
+	result = make(emails, 0, initialCapacity)
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
-		if i >= len(result) {
-			err = fmt.Errorf("превышен лимит пользователей")
-			return
-		}
-
 		var userEmail UserEmail
 		line := scanner.Bytes()
 		if err = json.Unmarshal(line, &userEmail); err != nil {
 			return
 		}
-		result[i] = userEmail
-		i++
+		result = append(result, userEmail)
 	}
 
 	if err = scanner.Err(); err != nil {
