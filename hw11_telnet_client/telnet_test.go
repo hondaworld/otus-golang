@@ -62,4 +62,14 @@ func TestTelnetClient(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("wrong address", func(t *testing.T) {
+		_, err := net.Listen("tcp", "asddfd")
+		require.Errorf(t, err, "listen tcp: address asddfd: missing port in address")
+	})
+
+	t.Run("wrong port", func(t *testing.T) {
+		_, err := net.Listen("tcp", "127.0.0.1")
+		require.Errorf(t, err, "listen tcp: address 127.0.0.1: missing port in address")
+	})
 }
