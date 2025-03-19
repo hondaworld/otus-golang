@@ -5,6 +5,17 @@ package main
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
 	Logger LoggerConf
+	Server struct {
+		Port int `mapstructure:"port"`
+	} `mapstructure:"server"`
+	Database struct {
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		User     string `mapstructure:"user"`
+		Password string `mapstructure:"password"`
+		DBName   string `mapstructure:"db_name"`
+	} `mapstructure:"database"`
+
 	// TODO
 }
 
