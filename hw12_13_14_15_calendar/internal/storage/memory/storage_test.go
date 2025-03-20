@@ -23,8 +23,8 @@ func TestStorage(t *testing.T) {
 	t.Run("list per date", func(t *testing.T) {
 		s := New()
 
-		id1, err := s.CreateEvent(event1)
-		id2, err := s.CreateEvent(event2)
+		id1, _ := s.CreateEvent(event1)
+		id2, _ := s.CreateEvent(event2)
 
 		event1.ID = id1
 		event2.ID = id2
@@ -37,8 +37,8 @@ func TestStorage(t *testing.T) {
 	t.Run("lest per week", func(t *testing.T) {
 		s := New()
 
-		id1, err := s.CreateEvent(event1)
-		id2, err := s.CreateEvent(event2)
+		id1, _ := s.CreateEvent(event1)
+		id2, _ := s.CreateEvent(event2)
 
 		event1.ID = id1
 		event2.ID = id2
