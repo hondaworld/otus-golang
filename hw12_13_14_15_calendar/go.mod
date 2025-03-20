@@ -1,6 +1,6 @@
 module github.com/hondaworld/otus-golang/hw12_13_14_15_calendar
 
-go 1.22
+go 1.23.7
 
 require (
 	github.com/google/uuid v1.6.0
