@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -41,6 +42,11 @@ func main() {
 	defer cancel()
 
 	go func() {
+		http.HandleFunc("/hello-world", helloWorldHandler)
+		http.ListenAndServe(":8080", nil)
+	}()
+
+	go func() {
 		<-ctx.Done()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -58,4 +64,9 @@ func main() {
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
+}
+
+func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Hello from the new endpoint!"))
 }
