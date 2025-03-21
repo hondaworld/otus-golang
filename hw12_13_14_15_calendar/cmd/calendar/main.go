@@ -43,7 +43,10 @@ func main() {
 
 	go func() {
 		http.HandleFunc("/hello-world", helloWorldHandler)
-		http.ListenAndServe(":8080", nil)
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			return
+		}
 	}()
 
 	go func() {
@@ -68,5 +71,8 @@ func main() {
 
 func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello from the new endpoint!"))
+	_, err := w.Write([]byte("Hello from the new endpoint!"))
+	if err != nil {
+		return
+	}
 }
