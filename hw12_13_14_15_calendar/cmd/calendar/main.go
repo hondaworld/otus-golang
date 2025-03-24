@@ -3,21 +3,22 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/hondaworld/otus-golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/hondaworld/otus-golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/hondaworld/otus-golang/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/hondaworld/otus-golang/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -41,6 +42,14 @@ func main() {
 	defer cancel()
 
 	go func() {
+		http.HandleFunc("/hello-world", helloWorldHandler)
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			return
+		}
+	}()
+
+	go func() {
 		<-ctx.Done()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -57,5 +66,13 @@ func main() {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
+	}
+}
+
+func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte("Hello from the new endpoint!"))
+	if err != nil {
+		return
 	}
 }
